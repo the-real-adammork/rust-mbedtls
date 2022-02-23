@@ -55,6 +55,8 @@ string(REGEX MATCH "GNU" CMAKE_COMPILER_IS_GNU "${CMAKE_C_COMPILER_ID}")
 string(REGEX MATCH "IAR" CMAKE_COMPILER_IS_IAR "${CMAKE_C_COMPILER_ID}")
 string(REGEX MATCH "MSVC" CMAKE_COMPILER_IS_MSVC "${CMAKE_C_COMPILER_ID}")
 
+string(REGEX MATCH "macabi" CMAKE_TARGET_IS_CATALYST "${TARGET}")
+
 # the test suites currently have compile errors with MSVC
 if(CMAKE_COMPILER_IS_MSVC)
     option(ENABLE_TESTING "Build mbed TLS tests." OFF)
@@ -210,8 +212,12 @@ if(CMAKE_COMPILER_IS_GNU)
 endif(CMAKE_COMPILER_IS_GNU)
 
 if(CMAKE_COMPILER_IS_CLANG)
+    add_compile_options(-target arm64-apple-ios13.0-macabi)
+    add_link_options(-target arm64-apple-ios13.0-macabi)
     add_compile_options(-Wno-overriding-t-option)
     add_link_options(-Wno-overriding-t-option)
+
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "13.0" CACHE STRING "Minimum OS X deployment version" FORCE)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wwrite-strings -Wpointer-arith -Wimplicit-fallthrough -Wshadow -Wvla -Wformat=2 -Wno-format-nonliteral")
     set(CMAKE_C_FLAGS_RELEASE     "-O2")
     set(CMAKE_C_FLAGS_DEBUG       "-O0 -g3")
