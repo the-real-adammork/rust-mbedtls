@@ -30,6 +30,7 @@ libc = { version = "0.2.138" }
 bindgen = { path = "/Users/adam/Projects/MobileCoin/rust-bindgen/bindgen" }
 cmake = { path = "/Users/adam/Projects/MobileCoin/cmake-rs" }
 cc = { path = "/Users/adam/Projects/MobileCoin/cc-rs" }
+#cc = "1.0.45"
 lazy_static = "1.4"
 syn = { version = "1.0.64", features = ["full", "visit"] }
 quote = "1.0.21"
