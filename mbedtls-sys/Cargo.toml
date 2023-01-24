@@ -27,10 +27,9 @@ libc = { version = "0.2.138", optional = true }
 libc = { version = "0.2.138" }
 
 [build-dependencies]
-bindgen = { path = "/Users/adam/Projects/MobileCoin/rust-bindgen/bindgen" }
-cmake = { path = "/Users/adam/Projects/MobileCoin/cmake-rs" }
-cc = { path = "/Users/adam/Projects/MobileCoin/cc-rs" }
-#cc = "1.0.45"
+bindgen = "0.60.1"
+cmake = "0.1.49"
+cc = "1.0.78"
 lazy_static = "1.4"
 syn = { version = "1.0.64", features = ["full", "visit"] }
 quote = "1.0.21"
