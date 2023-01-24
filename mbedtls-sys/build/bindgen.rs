@@ -11,7 +11,6 @@ use bindgen;
 use std::fmt::Write as _;
 use std::fs::{self, File};
 use std::io::Write;
-use std::ffi::OsString;
 use std::env;
 
 use crate::headers;
@@ -82,10 +81,6 @@ fn generate_deprecated_union_accessors(bindings: &str) -> String {
     impl_builder.impls
 }
 
-fn print_type_of<T>(_: &T) {
-    println!("{}", std::any::type_name::<T>())
-}
-
 impl super::BuildConfig {
     pub fn bindgen(&self) {
         let mut input = String::new();
@@ -95,38 +90,15 @@ impl super::BuildConfig {
 
         let mut cc = cc::Build::new();
 
-        eprint!("\n 1111 end cc.get_compiler().args() \n");
-        print_type_of(&cc.get_compiler().args());
-        //for arg in cc.get_compiler().args().iter_mut() { 
-            //let arg_str = arg.to_str().unwrap();
-            //eprint!("\n{}", arg_str);
-            //if arg_str.contains("--target") {
-                //*arg = OsString::from("--target=arm64-apple-ios13.1-macabi").to_owned();
-            //}
-        //}
-        eprint!("\n\n 1111 start cc.get_compiler().args() \n");
-
         cc.include(&self.mbedtls_include)
         .flag(&format!(
             "-DMBEDTLS_CONFIG_FILE=\"{}\"",
             self.config_h.to_str().expect("config.h UTF-8 error")
         ));
 
-        eprint!("\n 2222 end cc.get_compiler().args() \n");
-        for arg in cc.get_compiler().args().iter() {
-            eprint!("\n{}", arg.to_str().unwrap());
-        }
-        eprint!("\n\n 2222 start cc.get_compiler().args() \n");
-
         for cflag in &self.cflags {
             cc.flag(cflag);
         }
-
-        eprint!("\n 3333 end cc.get_compiler().args() \n");
-        for arg in cc.get_compiler().args().iter() {
-            eprint!("\n{}", arg.to_str().unwrap());
-        }
-        eprint!("\n\n 3333 start cc.get_compiler().args() \n");
 
         // Determine the sysroot for this compiler so that bindgen
         // uses the correct headers
@@ -152,16 +124,10 @@ impl super::BuildConfig {
         // See https://docs.rust-embedded.org/embedonomicon/custom-target.html
         // for more details.
         if let Some(target) = env::var_os("RUST_MBEDTLS_BINDGEN_TARGET") {
-            env::set_var("TARGET", "arm64-apple-ios13.1-macabi");
+            env::set_var("TARGET", target);
         }
 
-        eprint!("\n end cc.get_compiler().args() \n");
-        for arg in cc.get_compiler().args().iter() {
-            eprint!("\n{}", arg.to_str().unwrap());
-        }
-        eprint!("\n\n start cc.get_compiler().args() \n");
-
-        let bindings_result = bindgen::builder()
+        let bindings = bindgen::builder()
             .clang_args(cc.get_compiler().args().iter().map(|arg| arg.to_str().unwrap()))
             .header_contents("bindgen-input.h", &input)
             .allowlist_function("^(?i)mbedtls_.*")
@@ -181,13 +147,7 @@ impl super::BuildConfig {
             .translate_enum_integer_types(true)
             .rustfmt_bindings(false)
             .raw_line("#![allow(dead_code, non_snake_case, non_camel_case_types, non_upper_case_globals, invalid_value)]")
-            .generate();
-
-        //eprint!("{}", cc_args);
-
-        //eprint!("{}", bindings_result.command_line_flags());
-        
-        let bindings = bindings_result
+            .generate()
             .expect("bindgen error")
             .to_string();
 
